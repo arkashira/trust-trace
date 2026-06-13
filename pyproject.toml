@@ -5,7 +5,8 @@ build-backend = "poetry.masonry.api"
 [tool.poetry]
 name = "badge-generator"
 version = "1.0.0"
-description = "Generate a GenAI-Ethics badge"
+description = ""
+authors = ["Your Name"]
 
 [tool.poetry.dependencies]
 python = "^3.8"

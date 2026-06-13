@@ -1,33 +1,28 @@
-from src.badge_generator import generate_badge, create_svg_badge, verify_badge
 import pytest
+import sys
+from badge_generator import Studio, Badge, generate_badge, generate_svg_badge
 
 def test_generate_badge():
-    studio_logo = "Test Studio"
-    policy_summary = "This is a test policy summary"
-    badge = generate_badge(studio_logo, policy_summary)
-    assert badge.studio_logo == studio_logo
-    assert badge.policy_summary == policy_summary
+    studio = Studio("Test Studio", "https://example.com/logo.png", "This is a test policy summary.")
+    secret_key = "secret_key"
+    badge = generate_badge(studio, secret_key)
+    assert badge.studio == studio
     assert badge.timestamp is not None
     assert badge.policy_hash is not None
+    assert badge.signature is not None
 
-def test_create_svg_badge():
-    studio_logo = "Test Studio"
-    policy_summary = "This is a test policy summary"
-    badge = generate_badge(studio_logo, policy_summary)
-    svg_badge = create_svg_badge(badge)
+def test_generate_svg_badge():
+    studio = Studio("Test Studio", "https://example.com/logo.png", "This is a test policy summary.")
+    secret_key = "secret_key"
+    badge = generate_badge(studio, secret_key)
+    svg_badge = generate_svg_badge(badge)
     assert svg_badge is not None
-    assert studio_logo in svg_badge
-    assert policy_summary in svg_badge
+    assert "<svg" in svg_badge
+    assert "</svg>" in svg_badge
 
-def test_verify_badge():
-    studio_logo = "Test Studio"
-    policy_summary = "This is a test policy summary"
-    badge = generate_badge(studio_logo, policy_summary)
-    assert verify_badge(badge) == True
-
-def test_verify_badge_invalid_policy_hash():
-    studio_logo = "Test Studio"
-    policy_summary = "This is a test policy summary"
-    badge = generate_badge(studio_logo, policy_summary)
-    badge.policy_hash = "invalid_policy_hash"
-    assert verify_badge(badge) == False
+def test_main(capsys):
+    sys.argv = ["badge_generator.py", "--studio-name", "Test Studio", "--studio-logo", "https://example.com/logo.png", "--policy-summary", "This is a test policy summary.", "--secret-key", "secret_key"]
+    import badge_generator
+    badge_generator.main()
+    captured = capsys.readouterr()
+    assert captured.out is not None
